@@ -1,9 +1,6 @@
 name: 'GHActions-SMS-Freemobile'
 description: 'Github actions that notify on freemobile SMS.'
 inputs:
-  event_name:
-    description: 'The name of the event that triggered the workflow run.'
-    required: true
   repository:
     description: 'The Repository Name.'
     required: true
@@ -12,16 +9,7 @@ inputs:
     required: true
   pushRef:
     description: 'The ref of the push event'
-    required: false
-  action:
-    description: 'The action of the event'
-    required: false
-  number:
-    description: 'The number of the event'
-    required: false
-  title:
-    description: 'The title of the event'
-    required: false
+    required: true
   freemobile_user:
     description: 'The freemobile SMS API username.'
     required: true
