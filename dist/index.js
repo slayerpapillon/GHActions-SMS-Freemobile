@@ -58,7 +58,7 @@ let freemobile_password = "";
 const main = async () => {
 	try {
 		const event_name = core.getInput('event_name', { required: true });
-		const event = core.getInput('event', { required: true });
+		const event = core.getInput('webhook_event', { required: true });
 		freemobile_user = core.getInput('freemobile_user', { required: true });
 		freemobile_password = core.getInput('freemobile_password', { required: true });
 
