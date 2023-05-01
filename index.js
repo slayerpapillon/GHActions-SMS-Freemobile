@@ -1,4 +1,5 @@
 const core = require('@actions/core');
+import fetch from 'node-fetch';
 
 let freemobile_user = "";
 let freemobile_password = "";
