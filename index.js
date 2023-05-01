@@ -6,16 +6,43 @@ let freemobile_password = "";
 
 const main = async () => {
 	try {
+        const event_name = core.getInput('event_name', { required: true });
         const repository = core.getInput('repository', { required: true }); // Ex: octocat/Hello-World (from github.event.repository.full_name)
         const sender = core.getInput('sender', { required: true }); // Ex: octocat (from github.event.sender.login)
-        const pushRef = core.getInput('pushRef', { required: true }); // Ex: refs/heads/main (from github.event.ref)
 		freemobile_user = core.getInput('freemobile_user', { required: true });
 		freemobile_password = core.getInput('freemobile_password', { required: true });
 
-        const message = 'GitHub Push event.\nOn repo ' + repository + ' by ' + sender + '\nOn ref ' + pushRef;
-        const statusPush = await sendSMS(message);
-        
-        statusPush == 200 ? core.notice('Send OK') : core.setFailed('Send error!');
+        switch (event_name) {
+            case 'discussion':
+            break;
+            case 'discussion_comment':
+            break;
+            case 'issue_comment':
+            break;
+            case 'issues':
+                const action = core.getInput('action', { required: true }); // Ex: opened (from github.event.action)
+                const number = core.getInput('number', { required: true }); // Ex: 1 (from github.event.issue.number)
+                const title = core.getInput('title', { required: true }); // Ex: My pull title (from github.event.issue.title)
+                const issuesMessage = 'GitHub Issues event ' + action + '.\nOn repo --> ' + repository + '\nBy --> ' + sender + '\nIssue #' + number + ' ' + title;
+                const statusIssues = await sendSMS(issuesMessage);
+                statusIssues == 200 ? core.notice('Send OK') : core.setFailed('Send error!');
+                break;
+            case 'pull_request':
+            break;
+            case 'pull_request_review':
+            break;
+            case 'pull_request_review_comment':
+            break;
+            case 'push':
+                const pushRef = core.getInput('pushRef', { required: true }); // Ex: refs/heads/main (from github.event.ref)
+                const pushMessage = 'GitHub Push event.\nOn repo --> ' + repository + '\nBy --> ' + sender + '\nOn ref --> ' + pushRef;
+                const statusPush = await sendSMS(pushMessage);
+                statusPush == 200 ? core.notice('Send OK') : core.setFailed('Send error!');
+                break;
+            default:
+                core.notice('Not a track event.');
+                break;
+        }
     }
 	catch (error) {
 		core.setFailed(error.message);
