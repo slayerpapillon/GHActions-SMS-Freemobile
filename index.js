@@ -18,8 +18,8 @@ const main = async () => {
             case 'issue_comment':
             break;
             case 'issues':
-                const status = await issuesEvent(event);
-                status == 200 ? core.notice('Send OK') : core.setFailed('Send error!');
+                const statusIssues = await onIssues(event);
+                statusIssues == 200 ? core.notice('Send OK') : core.setFailed('Send error!');
                 return;
             case 'pull_request':
             break;
@@ -27,6 +27,10 @@ const main = async () => {
             break;
             case 'pull_request_review_comment':
             break;
+            case 'push':
+                const statusPush = await onPush(event);
+                statusPush == 200 ? core.notice('Send OK') : core.setFailed('Send error!');
+                return;
             default:
                 core.notice('Not a track event.');
             return;
@@ -38,14 +42,23 @@ const main = async () => {
   }
 }
 
-async function issuesEvent(event) {
+async function onIssues(event) {
     const action = event.action; // Ex: opened
     const repo = event.repository.full_name; // Ex: octocat/Hello-World
     const sender = event.sender.login; // Ex: octocat
     const number = event.issue.number; // Ex: 1
     const title = event.issue.title; // Ex: My pull title
 
-    const message = 'GitHub Issues event ' + action + '\nOn repo ' + repo + " by " + sender + "\nIssue #" + number + " " + title;
+    const message = 'GitHub Issues event ' + action + '.\nOn repo ' + repo + ' by ' + sender + '\nIssue #' + number + ' ' + title;
+    return await sendSMS(message);
+}
+
+async function onPush(event) {
+    const repo = event.repository.full_name; // Ex: octocat/Hello-World
+    const sender = event.sender.login; // Ex: octocat
+    const refEvent = event.ref; // Ex: refs/heads/main
+
+    const message = 'GitHub Push event.\nOn repo ' + repo + ' by ' + sender + '\nOn ref ' + refEvent;
     return await sendSMS(message);
 }
 
@@ -59,7 +72,7 @@ async function sendSMS(message) {
             msg: message
         }),
         headers: {
-        "Content-type": "application/json; charset=UTF-8"
+            "Content-type": "application/json; charset=UTF-8"
         }
     });
 

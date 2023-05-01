@@ -1,5 +1,5 @@
 {
-    "name": "GHAction_-SMS-Freemobile",
+    "name": "GHActions-SMS-Freemobile",
     "version": "1.0.0",
     "description": "Github actions that notify on freemobile SMS.",
     "main": "index.js",
