@@ -2,24 +2,43 @@
     "name": "GHActions-SMS-Freemobile",
     "version": "1.0.0",
     "description": "Github actions that notify on freemobile SMS.",
-    "main": "index.js",
+    "main": "lib/main.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build": "tsc",
+        "format": "prettier --write '**/*.ts'",
+        "format-check": "prettier --check '**/*.ts'",
+        "lint": "eslint src/**/*.ts",
+        "package": "ncc build --source-map --license licenses.txt",
+        "test": "jest",
+        "all": "npm run build && npm run format && npm run lint && npm run package"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/slayerpapillon/GHActions-SMS-Freemobile"
     },
-    "keywords": [],
+    "keywords": [
+        "actions",
+        "node"
+    ],
     "author": "",
-    "license": "ISC",
+    "license": "GPL-3.0",
     "bugs": {
         "url": "https://github.com/slayerpapillon/GHActions-SMS-Freemobile/issues"
     },
     "homepage": "https://github.com/slayerpapillon/GHActions-SMS-Freemobile#readme",
     "dependencies": {
         "@actions/core": "^1.10.0",
-        "@vercel/ncc": "^0.36.1",
         "node-fetch": "^3.3.1"
-    }
+    },
+    "devDependencies": {
+        "@types/node": "^18.16.3",
+        "@typescript-eslint/parser": "^5.59.2",
+        "@vercel/ncc": "^0.36.1",
+        "eslint": "^8.39.0",
+        "eslint-plugin-github": "^4.7.0",
+        "eslint-plugin-jest": "^27.2.1",
+        "js-yaml": "^4.1.0",
+        "prettier": "^2.8.8",
+        "typescript": "^5.0.4"
+      }
 }
