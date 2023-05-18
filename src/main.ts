@@ -52,7 +52,7 @@ async function run(): Promise<void> {
         const pushMessage = `GitHub Push event.\nOn repo --> ${repository}\nBy --> ${sender}\nOn ref --> ${pushRef}`
         const statusPush = await sendSMS(pushMessage)
         statusPush === 200
-          ? core.notice('Send OK for event ${github.context.eventName}')
+          ? core.notice(`Send OK for event ${github.context.eventName}`)
           : core.setFailed('Send error!')
         break
       }
