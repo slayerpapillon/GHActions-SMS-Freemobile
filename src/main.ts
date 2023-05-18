@@ -1,4 +1,7 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
+import {PushEvent} from '@octokit/webhooks-definitions/schema'
+
 import fetch from 'node-fetch'
 
 let freemobile_user = ''
@@ -11,6 +14,14 @@ async function run(): Promise<void> {
     const sender: string = core.getInput('sender', {required: true}) // Ex: octocat (from github.event.sender.login)
     freemobile_user = core.getInput('freemobile_user', {required: true})
     freemobile_password = core.getInput('freemobile_password', {required: true})
+
+    if (github.context.eventName === 'push') {
+      const pushPayload = github.context.payload as PushEvent
+      core.info(`The head commit is: ${pushPayload.head_commit}`)
+    }
+    else{
+      core.info(`Not a push Event, Event is ${github.context.eventName}`)
+    }
 
     switch (event_name) {
       case 'discussion':
