@@ -1,63 +1,51 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {PushEvent} from '@octokit/webhooks-definitions/schema'
+import {IssuesEvent, PushEvent} from '@octokit/webhooks-definitions/schema'
 
 import fetch from 'node-fetch'
 
-let freemobile_user = ''
-let freemobile_password = ''
-
 async function run(): Promise<void> {
   try {
-    const event_name: string = core.getInput('event_name', {required: true})
-    const repository: string = core.getInput('repository', {required: true}) // Ex: octocat/Hello-World (from github.event.repository.full_name)
-    const sender: string = core.getInput('sender', {required: true}) // Ex: octocat (from github.event.sender.login)
-    freemobile_user = core.getInput('freemobile_user', {required: true})
-    freemobile_password = core.getInput('freemobile_password', {required: true})
-
-    if (github.context.eventName === 'push') {
-      const pushPayload = github.context.payload as PushEvent
-      core.info(`The head commit is: ${pushPayload.head_commit}`)
-    }
-    else{
-      core.info(`Not a push Event, Event is ${github.context.eventName}`)
-    }
-
-    switch (event_name) {
-      case 'discussion':
-        break
-      case 'discussion_comment':
-        break
-      case 'issue_comment':
-        break
+    const freemobile_user = core.getInput('freemobile_user', {required: true})
+    const freemobile_password = core.getInput('freemobile_password', {required: true})
+    
+    switch (github.context.eventName) {
+      // case 'discussion':
+        // const discussionPayload = github.context.payload as Discussion
+        // break
+      // case 'discussion_comment':
+        // const discussionCommentEventPayload = github.context.payload as DiscussionCommentEvent
+        // break
+      // case 'issue_comment':
+        // const issueCommentEventPayload = github.context.payload as IssueCommentEvent
+        // break
       case 'issues': {
-        const action: string = core.getInput('action', {required: true}) // Ex: opened (from github.event.action)
-        const number: string = core.getInput('number', {required: true}) // Ex: 1 (from github.event.issue.number)
-        const title: string = core.getInput('title', {required: true}) // Ex: My pull title (from github.event.issue.title)
-        const issuesMessage = `GitHub Issues event ${action}.\nOn repo --> ${repository}\nBy --> ${sender}\nIssue #${number} ${title}`
-        const statusIssues = await sendSMS(issuesMessage)
-        statusIssues === 200
-          ? core.notice('Send OK')
-          : core.setFailed('Send error!')
+        const issuePayload = github.context.payload as IssuesEvent
+        const issuesMessage = `GitHub Issues action ${issuePayload.action}.
+        \nOn repo --> ${issuePayload.repository.full_name}
+        \nBy --> ${issuePayload.sender.login}
+        \nIssue #${issuePayload.issue.number} ${issuePayload.issue.title}`
+        //* Send the Message.
+        const statusIssues = await sendSMS(issuesMessage, freemobile_user, freemobile_password)
+        sendSMSReturnStatus(statusIssues)
         break
       }
-      case 'pull_request':
-        break
-      case 'pull_request_review':
-        break
-      case 'pull_request_review_comment':
-        break
+      // case 'pull_request':
+        // break
+      // case 'pull_request_review':
+        // break
+      // case 'pull_request_review_comment':
+        // break
       case 'push': {
-        const pushRef = core.getInput('pushRef', {required: true}) // Ex: refs/heads/main (from github.event.ref)
-        const pushMessage = `GitHub Push event.\nOn repo --> ${repository}\nBy --> ${sender}\nOn ref --> ${pushRef}`
-        const statusPush = await sendSMS(pushMessage)
-        statusPush === 200
-          ? core.notice(`Send OK for event ${github.context.eventName}`)
-          : core.setFailed('Send error!')
+        const pushPayload = github.context.payload as PushEvent
+        const pushMessage = `GitHub Push event.\nOn repo --> ${pushPayload.repository.full_name}\nBy --> ${pushPayload.sender.login}\nOn ref --> ${pushPayload.ref}`
+        //* Send the Message.
+        const statusPush = await sendSMS(pushMessage, freemobile_user, freemobile_password)
+        sendSMSReturnStatus(statusPush)
         break
       }
       default:
-        core.notice('Not a track event.')
+        core.notice(`Not a track event. Event is -> ${github.context.eventName}`)
         break
     }
   } catch (error) {
@@ -65,12 +53,12 @@ async function run(): Promise<void> {
   }
 }
 
-async function sendSMS(message: string): Promise<number> {
+async function sendSMS(message: string, user: string, pass: string): Promise<number> {
   const response = await fetch('https://smsapi.free-mobile.fr/sendmsg', {
     method: 'POST',
     body: JSON.stringify({
-      user: freemobile_user,
-      pass: freemobile_password,
+      user: user,
+      pass: pass,
       msg: message
     }),
     headers: {
@@ -79,6 +67,10 @@ async function sendSMS(message: string): Promise<number> {
   })
   const status = response.status
   return status
+}
+
+function sendSMSReturnStatus(status: number) {
+  status === 200 ? core.notice(`Send OK for event ${github.context.eventName}`) : core.setFailed('Send error!')
 }
 
 run()
