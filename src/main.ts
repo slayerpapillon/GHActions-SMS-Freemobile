@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {IssuesEvent, PushEvent} from '@octokit/webhooks-definitions/schema'
+import {StatusCodes} from 'http-status-codes';
 
 import fetch from 'node-fetch'
 
@@ -27,7 +28,7 @@ async function run(): Promise<void> {
         \nIssue #${issuePayload.issue.number} ${issuePayload.issue.title}`
         //* Send the Message.
         const statusIssues = await sendSMS(issuesMessage, freemobile_user, freemobile_password)
-        sendSMSReturnStatus(statusIssues)
+        sendSMSReturnStatus(statusIssues, StatusCodes.OK)
         break
       }
       // case 'pull_request':
@@ -41,7 +42,7 @@ async function run(): Promise<void> {
         const pushMessage = `GitHub Push event.\nOn repo --> ${pushPayload.repository.full_name}\nBy --> ${pushPayload.sender.login}\nOn ref --> ${pushPayload.ref}`
         //* Send the Message.
         const statusPush = await sendSMS(pushMessage, freemobile_user, freemobile_password)
-        sendSMSReturnStatus(statusPush)
+        sendSMSReturnStatus(statusPush, StatusCodes.OK)
         break
       }
       default:
@@ -69,8 +70,8 @@ async function sendSMS(message: string, user: string, pass: string): Promise<num
   return status
 }
 
-function sendSMSReturnStatus(status: number) {
-  status === 200 ? core.notice(`Send OK for event ${github.context.eventName}`) : core.setFailed('Send error!')
+function sendSMSReturnStatus(status: number, expectedStatus: StatusCodes) {
+  status === expectedStatus ? core.notice(`Send OK for event ${github.context.eventName}`) : core.setFailed('Send error!')
 }
 
 run()
